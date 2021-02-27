@@ -1,13 +1,14 @@
 import React from 'react';
 import axios from 'axios';
 import { apiBaseUrl } from '../constants';
-import { Entry, Patient } from '../types';
+import { Diagnosis, Entry, Patient } from '../types';
 import { useLocation } from 'react-router-dom';
 import { Icon } from 'semantic-ui-react';
+import { useStateValue } from '../state';
 
 const SinglePatientPage: React.FC = () => {
   const location = useLocation();
-  //console.log(location.state.id);
+  const [{ diagnoses }] = useStateValue();
   const [patient, setPatient] = React.useState<Patient | null>();
   React.useEffect(() => {
     const fetchPatient = async () => {
@@ -39,13 +40,20 @@ const SinglePatientPage: React.FC = () => {
           <p>occupation: {patient.occupation}</p>
           <h2>Entries</h2>
 
-          {Object.values(patient.entries).map((entry: Entry) => (
-            <div key={entry.id}>
+          {Object.values(patient.entries).map((entry: Entry, i: number) => (
+            <div key={i}>
               {entry.date} {entry.description}
               <>
-                {entry.diagnosisCodes?.map((code) => (
-                  <ul>
-                    <li>{code}</li>
+                {entry.diagnosisCodes?.map((code, i: number) => (
+                  <ul key={i}>
+                    <li>
+                      {code}{' '}
+                      {Object.values(diagnoses).map((diagnosis: Diagnosis) => {
+                        if (diagnosis.code === code) {
+                          return <div>{diagnosis.name}</div>;
+                        }
+                      })}
+                    </li>
                   </ul>
                 ))}
               </>
