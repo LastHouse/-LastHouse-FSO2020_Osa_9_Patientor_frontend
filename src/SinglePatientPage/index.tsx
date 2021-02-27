@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { apiBaseUrl } from '../constants';
-import { Patient } from '../types';
+import { Entry, Patient } from '../types';
 import { useLocation } from 'react-router-dom';
 import { Icon } from 'semantic-ui-react';
 
@@ -37,6 +37,20 @@ const SinglePatientPage: React.FC = () => {
           </h1>
           <p>ssn: {patient.ssn}</p>
           <p>occupation: {patient.occupation}</p>
+          <h2>Entries</h2>
+
+          {Object.values(patient.entries).map((entry: Entry) => (
+            <div key={entry.id}>
+              {entry.date} {entry.description}
+              <>
+                {entry.diagnosisCodes?.map((code) => (
+                  <ul>
+                    <li>{code}</li>
+                  </ul>
+                ))}
+              </>
+            </div>
+          ))}
         </div>
       ))}
     </div>

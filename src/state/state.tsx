@@ -1,19 +1,19 @@
-import React, { createContext, useContext, useReducer } from "react";
-import { Patient } from "../types";
-
-import { Action } from "./reducer";
+import React, { createContext, useContext, useReducer } from 'react';
+import { Patient } from '../types';
+import { Action } from './reducer';
+//import getAll from '../services';
 
 export type State = {
   patients: { [id: string]: Patient };
 };
 
 const initialState: State = {
-  patients: {}
+  patients: {},
 };
 
 export const StateContext = createContext<[State, React.Dispatch<Action>]>([
   initialState,
-  () => initialState
+  () => initialState,
 ]);
 
 type StateProviderProps = {
@@ -23,13 +23,25 @@ type StateProviderProps = {
 
 export const StateProvider: React.FC<StateProviderProps> = ({
   reducer,
-  children
+  children,
 }: StateProviderProps) => {
   const [state, dispatch] = useReducer(reducer, initialState);
+
   return (
     <StateContext.Provider value={[state, dispatch]}>
       {children}
     </StateContext.Provider>
   );
 };
+
 export const useStateValue = () => useContext(StateContext);
+
+/* const [, dispatch] = useStateValue();
+
+export const getPatients = () => {
+  return async () => {
+    const { data: patientListFromApi } = await getAll();
+
+    dispatch({ type: 'SET_PATIENT_LIST', payload: patientListFromApi });
+  };
+}; */
