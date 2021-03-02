@@ -1,14 +1,16 @@
 import React from 'react';
 import axios from 'axios';
 import { apiBaseUrl } from '../constants';
-import { Diagnosis, Entry, Patient } from '../types';
+import { Patient, Entry } from '../types';
 import { useLocation } from 'react-router-dom';
 import { Icon } from 'semantic-ui-react';
-import { useStateValue } from '../state';
+import HealthCheckComponent from '../HealthCheckComponent';
+import HospitalComponent from '../HospitalComponent';
+import OccupationalHealthcareComponent from '../OccupationalHealthcareComponent';
 
 const SinglePatientPage: React.FC = () => {
   const location = useLocation();
-  const [{ diagnoses }] = useStateValue();
+
   const [patient, setPatient] = React.useState<Patient | null>();
   React.useEffect(() => {
     const fetchPatient = async () => {
@@ -23,6 +25,27 @@ const SinglePatientPage: React.FC = () => {
     };
     fetchPatient();
   }, [location.state.id]);
+
+  const assertNever = (value: never): never => {
+    throw new Error(
+      `Unhandled discriminated union member: ${JSON.stringify(value)}`
+    );
+  };
+
+  const EntryDetails: React.FC<{
+    entry: Entry;
+  }> = ({ entry }) => {
+    switch (entry.type) {
+      case 'HealthCheck':
+        return <HealthCheckComponent {...entry} />;
+      case 'Hospital':
+        return <HospitalComponent {...entry} />;
+      case 'OccupationalHealthcare':
+        return <OccupationalHealthcareComponent {...entry} />;
+      default:
+        return assertNever(entry);
+    }
+  };
 
   if (!patient) return <div>loading...</div>;
 
@@ -39,25 +62,8 @@ const SinglePatientPage: React.FC = () => {
           <p>ssn: {patient.ssn}</p>
           <p>occupation: {patient.occupation}</p>
           <h2>Entries</h2>
-
           {Object.values(patient.entries).map((entry: Entry, i: number) => (
-            <div key={i}>
-              {entry.date} {entry.description}
-              <>
-                {entry.diagnosisCodes?.map((code, i: number) => (
-                  <ul key={i}>
-                    <li>
-                      {code}{' '}
-                      {Object.values(diagnoses).map((diagnosis: Diagnosis) => {
-                        if (diagnosis.code === code) {
-                          return <div>{diagnosis.name}</div>;
-                        }
-                      })}
-                    </li>
-                  </ul>
-                ))}
-              </>
-            </div>
+            <EntryDetails key={i} entry={entry} />
           ))}
         </div>
       ))}
